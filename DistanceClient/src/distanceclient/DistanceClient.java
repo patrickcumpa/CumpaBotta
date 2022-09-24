@@ -4,7 +4,12 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
 
+/**
+ * 
+ * @author PatrickCumpa
+ */
 public class DistanceClient {
+    
     private DatagramSocket socket;
     private String IP_address;
     private int UDP_port;
@@ -61,6 +66,9 @@ public class DistanceClient {
         return distance;
     }
 
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String args[]) {
         DistanceClient client;
         float lat_LI = (float)(43.55000); // latitudine Livorno
