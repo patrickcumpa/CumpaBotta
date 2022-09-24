@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
  
-
 /**
  *
  * @author TommasoBotta
@@ -90,6 +89,7 @@ public class DistanceServer extends Thread {
         socket.setSoTimeout(1000); // 1000ms = 1s
     }
 
+    @Override
     public void run() {
         byte[] buffer = new byte[1024];
         ByteBuffer data;
@@ -135,6 +135,9 @@ public class DistanceServer extends Thread {
         socket.close(); // chiusura del socket
     }
 
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         int c;
 
