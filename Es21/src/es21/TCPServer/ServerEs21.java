@@ -21,7 +21,7 @@ public class ServerEs21 {
             Thread thrServer = new Thread(server);
             thrServer.start();
         } catch (IOException ex) {
-            Logger.getLogger(ServerEs21.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Errore all'avvio: " + ex);
         }
     }
     
