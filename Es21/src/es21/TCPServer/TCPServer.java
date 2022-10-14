@@ -87,10 +87,10 @@ public class TCPServer implements Runnable {
             reader = new BufferedReader(new FileReader("dati.csv"));
             while ((line = reader.readLine()) != null) 
                 count++;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ex) { 
+            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return count < 10;
     }
