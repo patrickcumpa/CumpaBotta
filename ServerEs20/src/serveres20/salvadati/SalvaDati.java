@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import serveres20.ServerTCP.CassonettoSmart;
+import serveres20.serverudp.CassonettoSmart;
 import serveres20.TesseraRFID;
 
 /**
