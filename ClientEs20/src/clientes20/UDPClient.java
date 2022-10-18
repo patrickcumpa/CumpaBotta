@@ -70,6 +70,28 @@ public class UDPClient {
         return new String(datagram.getData(), datagram.getOffset(), datagram.getLength());
     }
     
+    public void riceviId() throws IOException {
+        byte[] buffer = new byte[1024];
+        DatagramPacket datagram = new DatagramPacket(buffer, buffer.length);
+        datagram.setLength(buffer.length);
+        socket.receive(datagram);
+
+        if (!(datagram.getAddress().equals(IP_address)) && (datagram.getPort() != serverPort)) {
+            throw new SocketTimeoutException();
+        }
+        System.out.print(new String(datagram.getData(), datagram.getOffset(), datagram.getLength()));
+        
+        buffer = new byte[Integer.BYTES];
+        datagram = new DatagramPacket(buffer, buffer.length);
+        socket.receive(datagram);
+        
+        if (!(datagram.getAddress().equals(IP_address)) && (datagram.getPort() != serverPort)) {
+            throw new SocketTimeoutException();
+        }
+        System.out.println("Il tuo ID e': " + ByteBuffer.wrap(datagram.getData()).getInt() + "\n");
+        
+    }
+    
     public void comandoNonValido() throws IOException {
         DatagramPacket datagram = new DatagramPacket(new byte[1024], 1024);
         socket.receive(datagram);
@@ -84,4 +106,3 @@ public class UDPClient {
     }
     
 }
-
