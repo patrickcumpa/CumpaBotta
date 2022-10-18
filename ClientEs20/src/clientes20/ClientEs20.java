@@ -55,10 +55,7 @@ public class ClientEs20 {
                         break;
 
                     case 2:
-                        System.out.print("Per favore, inserisci id: ");
-                        id = Integer.parseInt(input.readLine());
-                        risposta = client.sendAndReceiveData(id);
-                        System.out.println(risposta);
+                        client.riceviId();
                         break;
 
                     case 3:
