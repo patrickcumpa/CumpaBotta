@@ -1,11 +1,10 @@
 package serveres20;
 
-import serveres20.server.UDPServer;
+import java.io.FileNotFoundException;
 import serveres20.salva_dati.SalvaDati;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import serveres20.configuration.Configurazione;
+import java.net.SocketException;
+import serveres20.costanti.Costanti;
 
 /**
  *
@@ -16,17 +15,23 @@ public class ServerEs20 {
 
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
+     * @throws java.io.FileNotFoundException
+     * @throws java.lang.ClassNotFoundException
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, FileNotFoundException, ClassNotFoundException {
         
         try {
             SalvaDati.readToFile();
-            UDPServer server = new UDPServer(Configurazione.SERVER_PORT);
+            CassonettoSmart server = new CassonettoSmart(Costanti.SERVER_PORT);
             Thread serThread = new Thread(server);
             serThread.start();
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(ServerEs20.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            serThread.join();
+        } catch (SocketException ex) {
+            System.err.println("Errore all'avvio: " + ex);
+        } catch (InterruptedException ex) {
+            System.err.println("Fine!");
+        } 
     }
     
 }
