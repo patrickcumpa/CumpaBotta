@@ -19,7 +19,7 @@ import serveres20.TesseraRFID;
 public class SalvaDati implements Serializable {
     
     public static void saveToFile() throws FileNotFoundException, IOException {
-        FileOutputStream fos = new FileOutputStream("src\\serveres20\\salva_dati\\registro_tessere.ser");
+        FileOutputStream fos = new FileOutputStream("src\\serveres20\\salvadati\\registro_tessere.ser");
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(CassonettoSmart.tessereRegistrate);
         oos.writeObject(TesseraRFID.numeriGenerati);
@@ -28,7 +28,7 @@ public class SalvaDati implements Serializable {
     }
 
     public static void readToFile() throws FileNotFoundException, IOException, ClassNotFoundException {
-        FileInputStream fis = new FileInputStream("src\\serveres20\\salva_dati\\registro_tessere.ser");
+        FileInputStream fis = new FileInputStream("src\\serveres20\\salvadati\\registro_tessere.ser");
         ObjectInputStream ois = new ObjectInputStream(fis);
         CassonettoSmart.tessereRegistrate = (ArrayList<TesseraRFID>) ois.readObject();
         TesseraRFID.numeriGenerati = (ArrayList<Integer>) ois.readObject();
