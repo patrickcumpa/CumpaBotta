@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,19 +17,15 @@ public class ClientEs20 {
      */
     public static void main(String[] args) {
 
+        Scanner in = new Scanner(System.in);
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
         try {
             int id;
-            int scelta = 0;
+            int scelta;
             String risposta;
-            String nonRegistrato = "\nSiamo spiacenti, ma non risulti essere registrato.\nVuoi registrarti? [Y/n] ";
-            String vuoiEliminare = "\nVuoi eliminare la tua tessera? [Y/n] ";
-            Scanner in = new Scanner(System.in);
-
-            UDPClient client = new UDPClient();
-
             boolean loop = true;
+            UDPClient client = new UDPClient("localhost", 12345);
 
             while (loop) {
                 System.out.println("-------- BENVENUTO --------");
@@ -43,14 +36,15 @@ public class ClientEs20 {
                 System.out.print("Effettuare una scelta: ");
 
                 scelta = Integer.parseInt(input.readLine());
+                client.sendInt(scelta);
                 System.out.println("---------------------------\n");
 
                 switch (scelta) {
                     case 1:
-                        System.out.print("Per favore, inserire codice: ");
+                        System.out.print("Per favore, inserisci id: ");
                         id = Integer.parseInt(input.readLine());
-                        risposta = client.sendAndReceiveData(scelta, id);
-                        if (risposta.equals(nonRegistrato) || risposta.equals(vuoiEliminare)) {
+                        risposta = client.sendAndReceiveData(id);
+                        if (risposta.contains("registrarti?")) {
                             System.out.print(risposta);
                             char sc = in.next().charAt(0);
                             risposta = client.elaboraRisposta(sc);
@@ -61,17 +55,17 @@ public class ClientEs20 {
                         break;
 
                     case 2:
-                        System.out.print("Per favore, inserire codice da registrare: ");
+                        System.out.print("Per favore, inserisci id: ");
                         id = Integer.parseInt(input.readLine());
-                        risposta = client.sendAndReceiveData(scelta, id);
+                        risposta = client.sendAndReceiveData(id);
                         System.out.println(risposta);
                         break;
 
                     case 3:
-                        System.out.print("Per favore, inserire codice da eliminare: ");
+                        System.out.print("Per favore, inserisci id: ");
                         id = Integer.parseInt(input.readLine());
-                        risposta = client.sendAndReceiveData(scelta, id);
-                        if (risposta.equals(nonRegistrato) || risposta.equals(vuoiEliminare)) {
+                        risposta = client.sendAndReceiveData(id);
+                        if (risposta.contains("registrarti?") || risposta.contains("Vuoi")) {
                             System.out.print(risposta);
                             char sc = in.next().charAt(0);
                             risposta = client.elaboraRisposta(sc);
@@ -86,17 +80,15 @@ public class ClientEs20 {
                         break;
 
                     default:
-                        System.out.println("Per favore inserire una scelta valida!");
+                        client.comandoNonValido();
                 }
             }
-            client.chiudi(scelta);
+            client.closeSocket();
 
         } catch (SocketException ex) {
-            Logger.getLogger(ClientEs20.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(ClientEs20.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Errore all'avvio: " + ex);
         } catch (IOException ex) {
-            Logger.getLogger(ClientEs20.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Errore nell'elaborazione della risposta: " + ex);
         }
     }
 
