@@ -1,4 +1,4 @@
-package serveres20.salva_dati;
+package serveres20.salvadati;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import serveres20.CassonettoSmart;
+import serveres20.ServerTCP.CassonettoSmart;
 import serveres20.TesseraRFID;
 
 /**

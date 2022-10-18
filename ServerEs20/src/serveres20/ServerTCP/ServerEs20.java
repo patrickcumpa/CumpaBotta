@@ -1,10 +1,10 @@
-package serveres20;
+package serveres20.ServerTCP;
 
 import java.io.FileNotFoundException;
-import serveres20.salva_dati.SalvaDati;
+import serveres20.salvadati.SalvaDati;
 import java.io.IOException;
 import java.net.SocketException;
-import serveres20.costanti.Costanti;
+import serveres20.Costanti;
 
 /**
  *

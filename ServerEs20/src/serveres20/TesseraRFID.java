@@ -1,5 +1,6 @@
 package serveres20;
 
+import serveres20.ServerTCP.CassonettoSmart;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -34,11 +35,11 @@ public class TesseraRFID implements Serializable {
         return this.valida;
     }
     
-    protected void setValida(boolean valida) {
+    public void setValida(boolean valida) {
         this.valida = valida;
     }
     
-    protected boolean isValida() {  
+    public boolean isValida() {  
 
         Duration duration = Duration.between(getUltimaApertura(), 
                 LocalDateTime.now());
@@ -54,11 +55,11 @@ public class TesseraRFID implements Serializable {
         return getValida(); // ritorna falso
     }
 
-    protected LocalDateTime getUltimaApertura() {
+    public LocalDateTime getUltimaApertura() {
         return this.ultimaApertura;
     }
 
-    protected void setUltimaApertura(LocalDateTime ultimaApertura) {
+    public void setUltimaApertura(LocalDateTime ultimaApertura) {
         this.ultimaApertura = ultimaApertura;
     }
     

@@ -1,6 +1,6 @@
-package serveres20;
+package serveres20.ServerTCP;
 
-import serveres20.salva_dati.SalvaDati;
+import serveres20.salvadati.SalvaDati;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,7 +10,8 @@ import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import serveres20.costanti.Costanti;
+import serveres20.Costanti;
+import serveres20.TesseraRFID;
 
 /**
  *
