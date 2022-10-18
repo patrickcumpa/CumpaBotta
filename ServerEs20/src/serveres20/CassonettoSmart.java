@@ -1,71 +1,176 @@
 package serveres20;
 
-import serveres20.server.UDPServer;
 import serveres20.salva_dati.SalvaDati;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import serveres20.configuration.Configurazione;
+import serveres20.costanti.Costanti;
 
 /**
  *
  * @author PatrickCumpa
  * @since 04/10/2022
  */
-public class CassonettoSmart {
+public class CassonettoSmart implements Runnable {
 
+    private int portClient;
+    private InetAddress address;
+    private DatagramSocket socket;
+    private DatagramPacket request;
     private TesseraRFID utente = null;
-    private LocalDateTime oraApertura;
     public static ArrayList<TesseraRFID> tessereRegistrate = new ArrayList<>();
-    protected static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    public static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-    protected void apriCassonetto(int id) throws IOException {
+    public CassonettoSmart(int port) throws SocketException {
+        this.socket = new DatagramSocket(port);
+        this.socket.setSoTimeout(50000);
+    }
+    
+    @Override
+    public void run() {
+        int id;
+        int scelta;
+
+        System.out.println("Server in ascolto...\n");
+
+        while (!Thread.interrupted()) {
+            try {
+                scelta = receiveInt();
+                
+                address = request.getAddress();
+                portClient = request.getPort();
+
+                System.out.println("------- RICHIESTA CLIENTE -------");
+                System.out.println("IP cliente: " + request.getAddress());
+                System.out.println("Porta cliente: " + request.getPort());
+
+                switch (scelta) {
+                    case 1:
+                        System.out.println("Richiesta: apertura cassonetto");
+                        System.out.println("---------------------------------\n");
+                        id = receiveInt();
+                        apriCassonetto(id);
+                        break;
+
+                    case 2:
+                        System.out.println("Richiesta: crea tessera");
+                        System.out.println("---------------------------------\n");
+                        registraTessera();
+                        break;
+
+                    case 3:
+                        System.out.println("Richiesta: elimina tessera");
+                        System.out.println("---------------------------------\n");
+                        id = receiveInt();
+                        eliminaTessera(id);
+                        break;
+
+                    case 4:
+                        System.out.println("Richiesta: chiudi");
+                        System.out.println("---------------------------------\n");
+                        socket.close();
+                        Thread.currentThread().interrupt();
+                        break;
+
+                    default:
+                        byte[] buffer = "Per favore, inserire una scelta valida!".getBytes();
+                        DatagramPacket answer = new DatagramPacket(buffer, buffer.length, address, portClient);
+                        socket.send(answer);
+                }
+            } catch (IOException ex) {
+                System.err.println("Errore nella risposta: " + ex);
+            }
+        }
+    }
+    
+    private int receiveInt() throws IOException {
+        byte[] buffer = new byte[Integer.BYTES];
+        
+        request = new DatagramPacket(buffer, buffer.length);
+        socket.receive(request);
+        ByteBuffer input = ByteBuffer.wrap(request.getData());
+        return input.getInt();
+    }
+
+    private boolean answerAndReceiveData(String risposta) throws IOException {
+        byte[] buffer = risposta.getBytes();
+
+        DatagramPacket answer = new DatagramPacket(buffer, buffer.length, address, portClient);
+        socket.send(answer);
+
+        buffer = new byte[Character.BYTES];
+        request = new DatagramPacket(buffer, buffer.length);
+        socket.receive(request);
+        ByteBuffer input = ByteBuffer.wrap(request.getData());
+        char scelta = input.getChar();
+        return (scelta != 'n' || scelta == 'y');
+    }
+
+    private void answerData(String risposta) throws IOException {
+        byte[] buffer = risposta.getBytes();
+
+        DatagramPacket answer = new DatagramPacket(buffer, buffer.length, address, portClient);
+        socket.send(answer);
+    }
+    
+    private void sendId(TesseraRFID tessera) throws IOException {
+        ByteBuffer output = ByteBuffer.allocate(Integer.BYTES);
+        output.putInt(tessera.getId());
+        DatagramPacket answer = new DatagramPacket(output.array(), Integer.BYTES, address, portClient);
+        socket.send(answer);
+    }
+    
+    private void apriCassonetto(int id) throws IOException {
 
         utente = trovaUtente(id);
 
         if (utente == null) {
-            UDPServer.answerAndReceiveData(Configurazione.REGISTRARE);
-            registraTessera(id);
+            if (answerAndReceiveData(Costanti.REGISTRARE)) {
+                registraTessera();
+            } else {
+                answerData("Errore!\n");
+            }
         } else if (!utente.isValida()) {
-            String risposta = "\nSiamo spiacenti, ma non puoi utilizzare il cassonetto fino al " 
+            String risposta = "\nSiamo spiacenti, ma non puoi utilizzare il cassonetto fino al "
                     + dtf.format(utente.getUltimaApertura().plusHours(72)) + "\n";
-            UDPServer.answerData(risposta);
+            answerData(risposta);
         } else {
-            oraApertura = LocalDateTime.now();
+            utente.setUltimaApertura(LocalDateTime.now());
             utente.setValida(false);
-            utente.setUltimaApertura(oraApertura);
             SalvaDati.saveToFile();
-            UDPServer.answerData(Configurazione.APERTO);
+            answerData(Costanti.APERTO);
         }
     }
 
-    protected void registraTessera(int id) throws IOException {
-        TesseraRFID tessera = trovaUtente(id);
+    private void registraTessera() throws IOException {
+        TesseraRFID tessera = new TesseraRFID();
+        tessereRegistrate.add(tessera);
+        SalvaDati.saveToFile();
+        mostraTessereRegistrate();
+        answerData(Costanti.REGISTRATO);
+        sendId(tessera);
 
-        if (tessera != null) {
-            UDPServer.answerData(Configurazione.ESISTE);
-        } else {
-            tessera = new TesseraRFID(id);
-            tessereRegistrate.add(tessera);
-            SalvaDati.saveToFile();
-            mostraTessereRegistrate();
-            UDPServer.answerData(Configurazione.REGISTRATO);
-        }
     }
 
-    protected void eliminaTessera(int id) throws IOException {
+    private void eliminaTessera(int id) throws IOException {
 
         utente = trovaUtente(id);
 
         if (utente == null) {
-            UDPServer.answerData(Configurazione.NON_REGISTRATO);
-        } else if (UDPServer.answerAndReceiveData(Configurazione.ELIMINARE)) {
+            answerData(Costanti.NON_REGISTRATO);
+        } else if (answerAndReceiveData(Costanti.ELIMINARE)) {
             tessereRegistrate.remove(utente);
             SalvaDati.saveToFile();
-            UDPServer.answerData(Configurazione.ELIMINATO);
+            answerData(Costanti.ELIMINATO);
+        } else {
+            answerData("Errore!\n");
         }
-        UDPServer.answerData("Errore!\n");
     }
 
     private TesseraRFID trovaUtente(int id) {
@@ -76,12 +181,13 @@ public class CassonettoSmart {
         }
         return null;
     }
-    
+
     private void mostraTessereRegistrate() {
         System.out.println("--------------------------- TESSERE REGISTRATE ---------------------------");
-        for (TesseraRFID t : CassonettoSmart.tessereRegistrate) {
+        for (TesseraRFID t : tessereRegistrate) {
             System.out.println(t);
         }
         System.out.println("--------------------------------------------------------------------------\n");
     }
+
 }
