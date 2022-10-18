@@ -8,36 +8,41 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.util.Scanner;
 
 /**
  *
  * @author TommasoBotta
  */
 public class UDPClient {
-
+    
+    private int serverPort;
     private DatagramSocket socket;
     private InetAddress IP_address;
-    private int serverPort;
 
-    public UDPClient() throws SocketException, UnknownHostException {
-        socket = new DatagramSocket();
-        IP_address = InetAddress.getByName("localhost");
-        serverPort = 12345;
+
+    public UDPClient(String host, int port) throws SocketException, UnknownHostException {
+        this.serverPort = port;
+        this.IP_address = InetAddress.getByName(host);
+        this.socket = new DatagramSocket();
+        this.socket.setSoTimeout(50000);
     }
     
-    public String sendAndReceiveData(int opzione, int id) throws IOException {
-
-        ByteBuffer output = ByteBuffer.allocate(Integer.BYTES * 2);
-        output.putInt(opzione);
-        output.putInt(id);
-
-        DatagramPacket datagram = new DatagramPacket(output.array(), Integer.BYTES * 2, IP_address, serverPort);
+    public void sendInt(int numero) throws IOException {
+        if (socket.isClosed()) {
+            throw new IOException();
+        }
+        ByteBuffer output = ByteBuffer.allocate(Integer.BYTES);
+        output.putInt(numero);
+        DatagramPacket datagram = new DatagramPacket(output.array(), Integer.BYTES, IP_address, serverPort);
         socket.send(datagram);
-
+    }
+    
+    public String sendAndReceiveData(int id) throws IOException {
         byte[] buffer = new byte[1024];
+        
+        sendInt(id);
 
-        datagram = new DatagramPacket(buffer, buffer.length);
+        DatagramPacket datagram = new DatagramPacket(buffer, buffer.length);
         datagram.setLength(buffer.length);
         socket.receive(datagram);
 
@@ -62,17 +67,21 @@ public class UDPClient {
         if (!(datagram.getAddress().equals(IP_address)) && (datagram.getPort() != serverPort)) {
             throw new SocketTimeoutException();
         }
-        return new String(datagram.getData(), datagram.getOffset(), datagram.getLength(), "ISO-8859-1");
+        return new String(datagram.getData(), datagram.getOffset(), datagram.getLength());
     }
     
-    public void chiudi(int opzione) throws IOException {
-        ByteBuffer output = ByteBuffer.allocate(Integer.BYTES * 2);
-        output.putInt(opzione);
-        output.putInt(0);
-
-        DatagramPacket datagram = new DatagramPacket(output.array(), Integer.BYTES * 2, IP_address, serverPort);
-        socket.send(datagram);
-        socket.close();
+    public void comandoNonValido() throws IOException {
+        DatagramPacket datagram = new DatagramPacket(new byte[1024], 1024);
+        socket.receive(datagram);
+        if (!(datagram.getAddress().equals(IP_address)) && (datagram.getPort() != serverPort)) {
+            throw new SocketTimeoutException();
+        }
+        System.out.println(new String(datagram.getData(), datagram.getOffset(), datagram.getLength()));
     }
 
+    public void closeSocket() {
+        socket.close();
+    }
+    
 }
+
