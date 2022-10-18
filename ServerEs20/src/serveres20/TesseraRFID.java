@@ -1,6 +1,6 @@
 package serveres20;
 
-import serveres20.ServerTCP.CassonettoSmart;
+import serveres20.serverudp.CassonettoSmart;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
