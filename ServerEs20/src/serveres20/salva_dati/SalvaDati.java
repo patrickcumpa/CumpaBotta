@@ -22,6 +22,7 @@ public class SalvaDati implements Serializable {
         FileOutputStream fos = new FileOutputStream("src\\serveres20\\salva_dati\\registro_tessere.ser");
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(CassonettoSmart.tessereRegistrate);
+        oos.writeObject(TesseraRFID.numeriGenerati);
         oos.close();
         fos.close();
     }
@@ -30,6 +31,7 @@ public class SalvaDati implements Serializable {
         FileInputStream fis = new FileInputStream("src\\serveres20\\salva_dati\\registro_tessere.ser");
         ObjectInputStream ois = new ObjectInputStream(fis);
         CassonettoSmart.tessereRegistrate = (ArrayList<TesseraRFID>) ois.readObject();
+        TesseraRFID.numeriGenerati = (ArrayList<Integer>) ois.readObject();
         ois.close();
         fis.close();
     }
