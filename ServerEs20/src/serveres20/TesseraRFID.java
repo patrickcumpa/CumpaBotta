@@ -3,6 +3,8 @@ package serveres20;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  *
@@ -16,14 +18,15 @@ public class TesseraRFID implements Serializable {
     private int id;
     private boolean valida;
     private LocalDateTime ultimaApertura;
+    public static ArrayList<Integer> numeriGenerati = new ArrayList<>();
 
-    public TesseraRFID(int id) {
-        this.id = id;
+    public TesseraRFID() {
+        this.id = generaIdUnivoco();
         this.valida = true;
         this.ultimaApertura = LocalDateTime.now();
     }
     
-    protected int getId() {
+    public int getId() {
         return this.id;
     }
     
@@ -57,6 +60,16 @@ public class TesseraRFID implements Serializable {
 
     protected void setUltimaApertura(LocalDateTime ultimaApertura) {
         this.ultimaApertura = ultimaApertura;
+    }
+    
+    private int generaIdUnivoco() {
+        int idGenerato = new Random().nextInt(49) + 1;
+        
+        while (numeriGenerati.contains(idGenerato)) {
+            idGenerato = new Random().nextInt(99) + 1;
+        }
+        numeriGenerati.add(idGenerato);
+        return idGenerato;
     }
 
     @Override
