@@ -1,11 +1,8 @@
 package serveres20.serverudp;
 
-import java.io.FileNotFoundException;
 import serveres20.salvadati.SalvaDati;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import serveres20.Costanti;
 
 /**
